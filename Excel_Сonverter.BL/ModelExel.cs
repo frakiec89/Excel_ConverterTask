@@ -8,10 +8,10 @@
         public string NameCity { get; set; }
         public string NameProduct { get; set; }
         public string Unit {  get; set; }
-        public List<ModelExel> Models { get; set; } = new List<ModelExel>();
+        public List<PriceModel> Prices { get; set; } = new List<PriceModel>();
     }
 
-    public class ProceModel
+    public class PriceModel
     {
 
         public int  Id { get; set; }    

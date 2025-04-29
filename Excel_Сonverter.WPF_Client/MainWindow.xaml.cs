@@ -42,7 +42,7 @@ namespace Excel_Сonverter.WPF_Client
 
                         foreach (var item in r)
                         {
-                            MessageBox.Show(item.Position + " " + item.NameProduct);
+                          //  MessageBox.Show(item.Position + " " + item.NameProduct);
                         }
                     }
                 }
