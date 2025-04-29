@@ -28,7 +28,7 @@ namespace Excel_Сonverter.BL
                     var colCount = worksheet.Dimension.Columns;
                     
                     string cityName = worksheet.Name;
-                    string cityCode = GetCodeCity(cityName, package.Workbook);
+                    string cityCode = GetCodeCity(cityName, cityWorkbook);
                     int position = 0; 
                     // Чтение данных
                     for (int row = 1; row <= rowCount; row++)
@@ -47,7 +47,7 @@ namespace Excel_Сonverter.BL
                         m.Position = position;
                         m.Prices = GetPrices(worksheet.Cells, row , colCount);
                         m.NameCity = cityName;
-                        m.CodeCity = GetCodeCity(m.NameCity , package.);   
+                        m.CodeCity = cityCode;   
                         models.Add(m);
                     }
                 }
@@ -55,9 +55,15 @@ namespace Excel_Сonverter.BL
             return models;
         }
 
-        private string GetCodeCity(string nameCity, ExcelWorkbook workbook)
+        private string GetCodeCity(string nameCity, ExcelWorksheet cityWorkbook)
         {
-            return "поиск"; // todo  дописать
+            for (int i = 1; i< cityWorkbook.Dimension.Rows; i++)
+            {
+                var r = cityWorkbook.Cells[i, 3].Text;
+                if(r == nameCity)
+                    return cityWorkbook.Cells[i, 2].Text;
+            }
+            return "код не найден";
         }
 
         private List<PriceModel> GetPrices(ExcelRange cells, int row, int colCount)
