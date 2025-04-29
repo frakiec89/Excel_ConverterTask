@@ -4,6 +4,8 @@ namespace Excel_Сonverter.BL
 {
     public class ExelService
     {
+
+
         public List<ModelExel> GetModelExels(MemoryStream stream)
         {
             List<ModelExel> models = new List<ModelExel>();
@@ -17,25 +19,26 @@ namespace Excel_Сonverter.BL
 
                 // Получаем первый лист
 
+                var cityWorkbook = package.Workbook.Worksheets.SingleOrDefault(x=>x.Name.StartsWith("Регионы продаж"));
 
-                foreach (var worksheet in package.Workbook.Worksheets)
+                foreach (var worksheet in package.Workbook.Worksheets.Where(x=>x.Name.StartsWith("Регионы продаж")==false))
                 {
                     // Получаем количество строк и столбцов
                     var rowCount = worksheet.Dimension.Rows;
                     var colCount = worksheet.Dimension.Columns;
-
+                    
+                    string cityName = worksheet.Name;
+                    string cityCode = GetCodeCity(cityName, package.Workbook);
+                    int position = 0; 
                     // Чтение данных
                     for (int row = 1; row <= rowCount; row++)
                     {
-                        int position = 0;
+                        var idStr = worksheet.Cells[row, 2].Text;
 
-                        var id = worksheet.Cells[row, 1].Text.Trim();
-
-                        if (string.IsNullOrEmpty(id))
+                        if (string.IsNullOrWhiteSpace(idStr) || idStr.ToLower().Contains("id"))
                             continue;
 
-                        if (int.TryParse(id, out position) == false)
-                            continue;
+                        position++;
 
                         var m = new ModelExel();
                         m.NameProduct = worksheet.Cells[row, 3].Text.Trim();
@@ -43,13 +46,18 @@ namespace Excel_Сonverter.BL
                         m.Unit = worksheet.Cells[row, 4].Text.Trim();
                         m.Position = position;
                         m.Prices = GetPrices(worksheet.Cells, row , colCount);
-                        m.NameCity = GetCity(row);
-                       
+                        m.NameCity = cityName;
+                        m.CodeCity = GetCodeCity(m.NameCity , package.);   
                         models.Add(m);
                     }
                 }
             }
             return models;
+        }
+
+        private string GetCodeCity(string nameCity, ExcelWorkbook workbook)
+        {
+            return "поиск"; // todo  дописать
         }
 
         private List<PriceModel> GetPrices(ExcelRange cells, int row, int colCount)
@@ -79,11 +87,7 @@ namespace Excel_Сonverter.BL
 
             return models;
         }
-
-        private string GetCity(int row)
-        {
-            return "москва"; 
-        }
+        
     }
 }
 

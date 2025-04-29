@@ -3,9 +3,10 @@
     public class ModelExel
     {
         public int Position { get; set; }
-
         public string ID { get; set; }
         public string NameCity { get; set; }
+        public string CodeCity { get; set; }
+        
         public string NameProduct { get; set; }
         public string Unit {  get; set; }
         public List<PriceModel> Prices { get; set; } = new List<PriceModel>();
