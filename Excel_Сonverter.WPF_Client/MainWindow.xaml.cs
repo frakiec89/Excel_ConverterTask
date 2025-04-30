@@ -3,7 +3,6 @@ using System.IO;
 using Microsoft.Win32;
 using Excel_Сonverter.BL;
 
-
 namespace Excel_Сonverter.WPF_Client
 {
     /// <summary>
@@ -26,9 +25,7 @@ namespace Excel_Сonverter.WPF_Client
             if (resault != null)
             {
                 this.Title = openFileDialog.FileName;
-
                 var path = openFileDialog.FileName;
-
 
                 ExelService  service = new ExelService();
                 

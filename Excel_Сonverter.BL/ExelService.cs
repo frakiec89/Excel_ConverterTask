@@ -93,7 +93,46 @@ namespace Excel_Сonverter.BL
 
             return models;
         }
-        
+     
+        public Stream SaveReports (List<ModelReport> models , string path)
+        {
+            var memoryStream = new MemoryStream();
+
+            using (var package = new ExcelPackage(memoryStream))
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Отчет");
+                worksheet.Cells[1, 1].Value = "№ п/п"; 
+                worksheet.Cells[1, 2].Value = "Код города";     
+                worksheet.Cells[1, 3].Value = "Наименование города"; 
+                worksheet.Cells[1, 4].Value = "Всего Кол-во позиций в текущем городе"; 
+                worksheet.Cells[1, 5].Value = "Кол-во позиций с отметкой «ЖЦ»"; 
+                worksheet.Cells[1, 6].Value = "Кол-во позиций с отметкой «Т»"; 
+                worksheet.Cells[1, 7].Value = "Кол-во пустых позиций, без цены, в текущем городе"; 
+                worksheet.Cells[1, 8].Value = "Процент заполнения ценами в текущем городе"; 
+
+                int r = 2; 
+                foreach (var item in models)
+                {
+                    worksheet.Cells[r, 1].Value = item.Position;   
+                    worksheet.Cells[r, 2].Value = item.CodeCity;   
+                    worksheet.Cells[r, 3].Value = item.NameCity;   
+                    worksheet.Cells[r, 4].Value = item.CountProduct;  
+                    worksheet.Cells[r, 5].Value = item.CountChZ; 
+                    worksheet.Cells[r, 6].Value = item.CountT;   
+                    worksheet.Cells[r, 7].Value = item.CountEmpty;   
+                    worksheet.Cells[r, 8].Value = item.fillPercentage;   
+                    r++; 
+                }
+               
+                package.Save();
+            }
+
+            // Reset the position of the memory stream to the beginning
+            memoryStream.Position = 0;
+
+            // Return the memory stream
+            return memoryStream;
+        }
     }
 }
 
