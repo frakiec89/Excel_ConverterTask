@@ -2,35 +2,44 @@
 
 namespace Excel_Сonverter.BL
 {
-    internal class ReportService
+    public class ReportService
     {
         public List<ModelReport> GetModelReports (List<ModelExel> models)
         {
-            List<string> cities = models.Select(x=>x.CodeCity).Distinct().ToList();
+            List<string> cities = models.Select(x=>x.CodeCity).Distinct().ToList();  // список  городов 
             List<ModelReport> modelReports = new List<ModelReport>();
 
             int x = 0;  
             foreach (var codeCity in cities)
             {
+                // todo переписать  на linq с группировками
 
-                var cityReport = models.Where(x => x.CodeCity == codeCity);
+                var cityReport = models.Where(x => x.CodeCity == codeCity); // продукты  в  однм город 
+                List<PriceModel> prices = GetListPrices(cityReport); 
 
-                List<PriceModel> prices = GetListPrices(cityReport);
+                x++; // позиция
 
-                x++;
                 var m = new ModelReport();
+
                 m.NameCity = cityReport.FirstOrDefault().NameCity;
                 m.CodeCity = codeCity;
-                m.Position = x; 
-                m.CountProduct = prices.Where(x=>x.PriceIndicator.ToLower().Contains("жц")).Count();
-                m.CountT = prices.Where(x => x.PriceIndicator.ToLower().Contains("т")).Count();
-                m.CountEmpty = prices.Where(x => x.Value==0).Count();
-                m.fillPercentage = ((m.CountChZ + m.CountT) / 5) *100;// todo поменять 5  ;
+                m.Position = x;
+                m.CountProduct = cityReport.Count();
+                m.CountChZ = prices.Where(x=>x.PriceIndicator.ToLower().StartsWith("жц")).Count();
+                m.CountT =  prices.Where(x => x.PriceIndicator.ToLower().StartsWith("т")).Count();
+                m.CountEmpty = prices.Where(x => string.IsNullOrEmpty(x.PriceIndicator)).Count();
+                m.fillPercentage = ((m.CountChZ + m.CountT) / 5.0) *100;// todo поменять 5  ; формула странная
                 modelReports.Add(m);
             }
             return modelReports;
         }
 
+
+        /// <summary>
+        /// Все цены в городе  в лист
+        /// </summary>
+        /// <param name="cityReport"></param>
+        /// <returns></returns>
         private List<PriceModel> GetListPrices(IEnumerable<ModelExel> cityReport)
         {
             List<PriceModel> prices= new List<PriceModel>();
@@ -38,7 +47,7 @@ namespace Excel_Сonverter.BL
             {
                 foreach (var item in product.Prices)
                 {
-                    prices.Add(item);
+                    prices.Add(item); 
                 }
             }
             return prices;

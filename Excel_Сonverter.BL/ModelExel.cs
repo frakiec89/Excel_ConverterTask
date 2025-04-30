@@ -14,10 +14,21 @@
 
     public class PriceModel
     {
+        private string priceIndicator;
 
         public int  Id { get; set; }    
         public double Value { get; set; }
-        public string PriceIndicator { get; set; }
+        public string PriceIndicator 
+        {   get { return priceIndicator; }
+
+            set
+            {
+                if (value.Trim().ToLower() == "жц" || value.Trim().ToLower() == "т")     // Сделайем ограничение
+                     priceIndicator = value; 
+                else
+                    priceIndicator =string.Empty;
+            } 
+        }
         public string Supplier { get; set; }
     }
 }

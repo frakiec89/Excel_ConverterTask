@@ -6,6 +6,11 @@ namespace Excel_Сonverter.BL
     {
 
 
+        /// <summary>
+        /// получим лист с данными из файла
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
         public List<ModelExel> GetModelExels(MemoryStream stream)
         {
             List<ModelExel> models = new List<ModelExel>();
@@ -14,6 +19,8 @@ namespace Excel_Сonverter.BL
             using (var package = new ExcelPackage(stream))
             {
                 // на  основе  моего  кода  https://github.com/frakiec89/Parsing_RSO_To_GSK.WebAPI/blob/master/Parsing_RSO_To_GSK.WebAPI.ParseExel/ExelService.cs 
+
+
                 ExcelPackage.License.SetNonCommercialOrganization("<My Noncommercial organization>");
                 ExcelPackage.License.SetNonCommercialPersonal("<My Name>");
 
@@ -30,6 +37,7 @@ namespace Excel_Сonverter.BL
                     string cityName = worksheet.Name;
                     string cityCode = GetCodeCity(cityName, cityWorkbook);
                     int position = 0; 
+
                     // Чтение данных
                     for (int row = 1; row <= rowCount; row++)
                     {
@@ -55,9 +63,15 @@ namespace Excel_Сonverter.BL
             return models;
         }
 
+        /// <summary>
+        /// коды  получим отделно
+        /// </summary>
+        /// <param name="nameCity"></param>
+        /// <param name="cityWorkbook"></param>
+        /// <returns></returns>
         private string GetCodeCity(string nameCity, ExcelWorksheet cityWorkbook)
         {
-            for (int i = 1; i< cityWorkbook.Dimension.Rows; i++)
+            for (int i = 1; i<= cityWorkbook.Dimension.Rows; i++)
             {
                 var r = cityWorkbook.Cells[i, 3].Text;
                 if(r == nameCity)
@@ -66,13 +80,21 @@ namespace Excel_Сonverter.BL
             return "код не найден";
         }
 
+
+        /// <summary>
+        /// получим цены 
+        /// </summary>
+        /// <param name="cells"></param>
+        /// <param name="row"></param>
+        /// <param name="colCount"></param>
+        /// <returns></returns>
         private List<PriceModel> GetPrices(ExcelRange cells, int row, int colCount)
         {
             List<PriceModel> models = new List<PriceModel>();
           
             int  x = 0;
           
-            for (int i = 5; i < colCount; i+=3)
+            for (int i = 5; i < colCount; i+=3) // может быть  и больше  5 цен
             {
                 x++;
             
@@ -94,13 +116,31 @@ namespace Excel_Сonverter.BL
             return models;
         }
      
-        public Stream SaveReports (List<ModelReport> models , string path)
+
+        /// <summary>
+        /// Сохранений  данных в  поток 
+        /// </summary>
+        /// <param name="models"></param>
+        /// <returns></returns>
+        public Stream SaveReports (List<ModelReport> models )
         {
             var memoryStream = new MemoryStream();
 
             using (var package = new ExcelPackage(memoryStream))
             {
                 var worksheet = package.Workbook.Worksheets.Add("Отчет");
+
+                //ширина  
+                worksheet.Column(1).Width = 10;
+                worksheet.Column(2).Width = 30;
+                worksheet.Column(3).Width = 30;
+                worksheet.Column(4).Width = 30;
+                worksheet.Column(5).Width = 30;
+                worksheet.Column(6).Width = 30;
+                worksheet.Column(7).Width = 40;
+                worksheet.Column(8).Width = 50;
+                
+                //шапка
                 worksheet.Cells[1, 1].Value = "№ п/п"; 
                 worksheet.Cells[1, 2].Value = "Код города";     
                 worksheet.Cells[1, 3].Value = "Наименование города"; 
@@ -111,6 +151,8 @@ namespace Excel_Сonverter.BL
                 worksheet.Cells[1, 8].Value = "Процент заполнения ценами в текущем городе"; 
 
                 int r = 2; 
+
+                //данные
                 foreach (var item in models)
                 {
                     worksheet.Cells[r, 1].Value = item.Position;   
@@ -127,10 +169,8 @@ namespace Excel_Сonverter.BL
                 package.Save();
             }
 
-            // Reset the position of the memory stream to the beginning
             memoryStream.Position = 0;
 
-            // Return the memory stream
             return memoryStream;
         }
     }

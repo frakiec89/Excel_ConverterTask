@@ -22,28 +22,54 @@ namespace Excel_Сonverter.WPF_Client
 
             var resault = openFileDialog.ShowDialog();
 
-            if (resault != null)
+            try
             {
-                this.Title = openFileDialog.FileName;
-                var path = openFileDialog.FileName;
-
-                ExelService  service = new ExelService();
-                
-                using (var fileStream = File.OpenRead(path))
+                if (resault != null)
                 {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        fileStream.CopyTo(memoryStream);
-                        memoryStream.Position = 0;
-                        var r = service.GetModelExels(memoryStream);
+                    this.Title = openFileDialog.FileName;
+                    var path = openFileDialog.FileName;
 
-                        foreach (var item in r)
+                    ExelService service = new ExelService();
+
+                    using (var fileStream = File.OpenRead(path))
+                    {
+                        using (var memoryStream = new MemoryStream())
                         {
-                            MessageBox.Show(item.Position + " " + item.NameProduct , item.NameCity + " " + item.CodeCity );
+                            fileStream.CopyTo(memoryStream);
+                            memoryStream.Position = 0;
+                            var r = service.GetModelExels(memoryStream);
+                            ReportService reportService = new ReportService();
+                            var otch = reportService.GetModelReports(r);
+                            Stream st = service.SaveReports(otch);
+
+                            SaveFileDialog saveFileDialog = new SaveFileDialog();
+                            saveFileDialog.Filter = "xlsx файлы|*.xlsx";
+
+                            if (saveFileDialog.ShowDialog() == true)
+                            {
+                                using (FileStream saveStream = new FileStream(saveFileDialog.FileName, FileMode.Create, FileAccess.Write))
+                                {
+                                    st.CopyTo(saveStream);
+                                }
+                                st.Close();
+
+                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                                {
+                                    FileName = saveFileDialog.FileName,
+                                    UseShellExecute = true
+                                });
+
+                            }
+
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
     }
 }
